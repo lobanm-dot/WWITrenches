@@ -256,11 +256,20 @@
                         
                         <!-- DROP ZONES CONTAINER (Hidden by default) -->
                         <div id="diagram-overlay" class="absolute inset-0 hidden z-30">
-                            <!-- Drop Zones: Adjust top/left percentages to match your Diagram1.png -->
-                            <div class="drop-zone" id="zone-A" style="top: 20%; left: 15%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="parapet">A</div>
-                            <div class="drop-zone" id="zone-B" style="top: 50%; left: 20%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="firestep">B</div>
-                            <div class="drop-zone" id="zone-C" style="top: 85%; left: 40%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="duckboards">C</div>
-                            <div class="drop-zone" id="zone-D" style="top: 60%; left: 70%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="dugout">D</div>
+                            <!-- E: No Man's Land (Top) -->
+                            <div class="drop-zone" id="zone-E" style="top: 5%; left: 45%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="nomansland">E</div>
+                            
+                            <!-- D: Barbed Wire (Below E) -->
+                            <div class="drop-zone" id="zone-D" style="top: 20%; left: 60%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="barbedwire">D</div>
+
+                            <!-- A: Parapet -->
+                            <div class="drop-zone" id="zone-A" style="top: 10%; left: 10%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="parapet">A</div>
+                            
+                            <!-- B: Fire Step -->
+                            <div class="drop-zone" id="zone-B" style="top: 25%; left: 30%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="firestep">B</div>
+                            
+                            <!-- C: Duckboards -->
+                            <div class="drop-zone" id="zone-C" style="top: 50%; left: 20%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="duckboards">C</div>
                         </div>
                     </div>
                     
@@ -273,11 +282,12 @@
                         <div id="options-container" class="flex flex-col gap-3"></div>
                         
                         <!-- Drag Items Container (Hidden by default) -->
-                        <div id="diagram-items" class="hidden grid grid-cols-2 gap-2">
-                            <div id="drag1" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="firestep">Raised platform for shooting</div>
-                            <div id="drag2" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="duckboards">Wooden slats to keep feet dry</div>
-                            <div id="drag3" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="parapet">Protective earthen wall</div>
-                            <div id="drag4" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="dugout">Underground shelter</div>
+                        <div id="diagram-items" class="hidden grid grid-cols-2 md:grid-cols-3 gap-2">
+                            <div id="drag1" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="nomansland">Deadly ground between trenches</div>
+                            <div id="drag2" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="barbedwire">Defensive wire obstacles</div>
+                            <div id="drag3" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="firestep">Raised platform for shooting</div>
+                            <div id="drag4" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="duckboards">Wooden slats to keep feet dry</div>
+                            <div id="drag5" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="parapet">Protective earthen wall</div>
                         </div>
                     </div>
                 </div>
@@ -309,19 +319,27 @@
 
         <!-- MODALS -->
         <div id="map-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-6">
-            <!-- (Map Modal Content - Same as before) -->
             <div class="map-container w-full max-w-4xl p-6 bg-[#d2b48c]">
                 <div class="flex justify-between items-center mb-4 border-b-2 border-[#2b261e] pb-2">
                     <h2 class="text-2xl stencil text-[#2b261e]">Tactical Map</h2>
-                    <button onclick="toggleMap()" class="text-[#2b261e] text-3xl hover:text-[#8a1c1c] transition">&times;</button>
+                    <div class="flex gap-4 items-center">
+                        <label for="map-upload" class="cursor-pointer btn-tactile py-1 px-3 text-[10px]">
+                             <i class="fa-solid fa-upload"></i> Custom Map
+                        </label>
+                        <input type="file" id="map-upload" class="hidden" accept="image/*" onchange="handleMapUpload(event)">
+                        <button onclick="toggleMap()" class="text-[#2b261e] text-3xl hover:text-[#8a1c1c] transition">&times;</button>
+                    </div>
                 </div>
-                <div class="relative w-full aspect-video bg-[#c2b280] border-2 border-[#2b261e] overflow-hidden shadow-inner flex items-center justify-center">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Western_Front_1918_Avg.jpg/1200px-Western_Front_1918_Avg.jpg" class="w-full h-full object-cover absolute inset-0 mix-blend-multiply opacity-80 filter sepia-[.3] contrast-125">
+                <div class="relative w-full aspect-video bg-[#c2b280] border-2 border-[#2b261e] overflow-hidden shadow-inner flex items-center justify-center" id="map-view-area">
+                    <img id="default-map-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Western_Front_1918_Avg.jpg/1200px-Western_Front_1918_Avg.jpg" alt="Western Front Map" class="w-full h-full object-cover absolute inset-0 mix-blend-multiply opacity-80 filter sepia-[.3] contrast-125">
+                    <img id="custom-map-img" class="absolute inset-0 w-full h-full object-cover hidden mix-blend-multiply opacity-80">
                     <div class="hotspot" style="top: 35%; left: 35%;" onclick="showInfo('The Somme', 'Devastated by years of conflict.')"></div>
                     <div class="hotspot" style="top: 55%; left: 45%;" onclick="showInfo('Belleau Wood', 'U.S. Marines pushing through heavy timber.')"></div>
                     <div class="hotspot" style="top: 65%; left: 60%;" onclick="showInfo('Meuse-Argonne', 'The final bloody offensive.')"></div>
                 </div>
-                <div id="map-info" class="mt-4 p-3 bg-[#2b261e] text-[#dcd5c7] text-sm text-center font-mono border border-[#5c5542]">> SELECT SECTOR</div>
+                <div id="map-info" class="mt-4 p-3 bg-[#2b261e] text-[#dcd5c7] text-sm text-center font-mono border border-[#5c5542]">
+                    > SELECT SECTOR FOR INTEL
+                </div>
             </div>
         </div>
 
@@ -331,7 +349,9 @@
                 <h1 id="end-title" class="text-6xl stencil mb-6 text-[#2b261e] uppercase">M.I.A.</h1>
                 <p id="end-description" class="text-xl mb-10 leading-relaxed text-stone-800 font-bold font-mono"></p>
                 <div id="stats-summary" class="bg-[#bdaea1] p-6 mb-10 border border-stone-600 shadow-inner"></div>
-                <button onclick="location.reload()" class="w-full btn-tactile py-5 text-xl"><i class="fa-solid fa-rotate-left"></i> Re-Enlist</button>
+                <button onclick="location.reload()" class="w-full btn-tactile py-5 text-xl">
+                    <i class="fa-solid fa-rotate-left"></i> Re-Enlist
+                </button>
             </div>
         </div>
     </div>
@@ -369,7 +389,7 @@
             {
                 type: "diagram",
                 title: "Training: Trench Anatomy",
-                text: "Before taking the night watch, prove you know the layout. Drag the tactical descriptions to the correct Labels (A, B, C, D) on the diagram.",
+                text: "Before taking the night watch, prove you know the layout. Drag the tactical descriptions to the correct Labels (A, B, C, D, E) on the diagram.",
                 image: "Diagram1.png"
             },
             {
@@ -470,6 +490,23 @@
             }
         ];
 
+        function handleMapUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const defaultMap = document.getElementById('default-map-img');
+                const customMap = document.getElementById('custom-map-img');
+                if(defaultMap) defaultMap.classList.add('hidden');
+                if(customMap) {
+                    customMap.src = e.target.result;
+                    customMap.classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
         function startGame() {
             document.getElementById('splash').classList.add('hidden');
             document.getElementById('role-selection').classList.remove('hidden');
@@ -544,13 +581,13 @@
                 document.getElementById(draggedId).classList.add('hidden-drag');
                 gameState.correctDrops++;
                 
-                if (gameState.correctDrops === 4) {
+                if (gameState.correctDrops === 5) { // Updated to require 5 matches
                     // All Correct - Advance
                     setTimeout(() => {
                         alert("TRAINING COMPLETE. SECTOR CLEARED.");
                         document.querySelectorAll('.drop-zone').forEach(el => {
                             el.classList.remove('correct'); 
-                            el.innerHTML = el.id.split('-')[1]; // Reset to A,B,C,D
+                            el.innerHTML = el.id.split('-')[1]; // Reset to A,B,C,D,E
                         });
                         document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('hidden-drag'));
                         gameState.round++;

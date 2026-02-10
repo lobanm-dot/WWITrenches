@@ -380,7 +380,13 @@
                 text: "You arrive at the railhead near Verdun. The sky is a bruised purple and the air tastes of cordite. Your Sergeant is barking orders to unload heavy crates of artillery shells.",
                 image: "Round1.png",
                 options: [
-                    { text: "Help unload shells (Labor)", health: -1, outcome: "Your muscles scream, but the supply officer gives you extra chocolate.", fate: "Physical toll (-1 HP), Morale up." },
+                    { 
+                        text: "Help unload shells (Labor)", 
+                        health: -1, 
+                        outcome: "Your muscles scream, but the supply officer gives you extra chocolate.", 
+                        fate: "Physical toll (-1 HP), Morale up.",
+                        sound: "Explosion1.mp3" // Added Sound Here
+                    },
                     { text: "Orient yourself with the maps", health: 0, outcome: "You memorize the fallback lines and bunker locations.", fate: "No physical change, but focus is high." },
                     { text: "Try to steal a nap in the mud", health: +1, outcome: "You catch 20 minutes of rest despite the shelling.", fate: "Recuperated (+1 HP)." }
                 ]
@@ -602,6 +608,12 @@
         }
 
         function makeDecision(opt) {
+            // SOUND EFFECT TRIGGER
+            if (opt.sound) {
+                const audio = new Audio(opt.sound);
+                audio.play().catch(e => console.log("Sound failed to play:", e));
+            }
+
             const prevHealth = gameState.health;
             gameState.health += opt.health;
             if (gameState.role === 'Medic' && opt.health >= 0) {

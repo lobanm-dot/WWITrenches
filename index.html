@@ -38,8 +38,6 @@
         }
 
         /* --- VISUAL FX --- */
-        
-        /* Screen Shake Animation */
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -54,142 +52,112 @@
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
 
-        .shake-effect {
-            animation: shake 0.4s;
-            animation-iteration-count: 1;
-        }
+        .shake-effect { animation: shake 0.4s; animation-iteration-count: 1; }
 
-        /* Damage/Heal Overlay Flash */
         #fx-overlay {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 100;
-            opacity: 0;
-            transition: opacity 0.1s ease-out;
-            mix-blend-mode: overlay;
+            position: fixed; inset: 0; pointer-events: none; z-index: 100;
+            opacity: 0; transition: opacity 0.1s ease-out; mix-blend-mode: overlay;
         }
 
         /* Typography */
         .typewriter { font-family: 'Special Elite', cursive; }
         .stencil { font-family: 'Black Ops One', cursive; letter-spacing: 0.1em; }
 
-        /* "Gamey" Card Style - Stained Folder Look */
+        /* Game Card */
         .game-card {
             background-color: var(--paper-stained);
             border: 2px solid #5c5542;
-            /* Inner shadow for depth, outer shadow for lift */
-            box-shadow: 
-                inset 0 0 60px rgba(0,0,0,0.2), 
-                0 10px 20px rgba(0,0,0,0.5),
-                0 0 0 4px rgba(0,0,0,0.2); 
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.5), 0 0 0 4px rgba(0,0,0,0.2); 
             position: relative;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
         }
 
         /* Tactile Buttons */
         .btn-tactile {
-            background: #3e3a30;
-            color: #dcd5c7;
-            border-bottom: 4px solid #1a1814;
-            border-right: 2px solid #1a1814;
-            border-top: 1px solid #5c5542;
-            border-left: 1px solid #5c5542;
-            transition: all 0.1s;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: bold;
-            text-shadow: 1px 1px 0 #000;
+            background: #3e3a30; color: #dcd5c7;
+            border-bottom: 4px solid #1a1814; border-right: 2px solid #1a1814;
+            border-top: 1px solid #5c5542; border-left: 1px solid #5c5542;
+            transition: all 0.1s; text-transform: uppercase;
+            letter-spacing: 0.1em; font-weight: bold; text-shadow: 1px 1px 0 #000;
         }
+        .btn-tactile:hover { background: #4a4539; transform: translateY(-1px); }
+        .btn-tactile:active { transform: translateY(2px); border-bottom-width: 1px; }
 
-        .btn-tactile:hover {
-            background: #4a4539;
-            transform: translateY(-1px);
-        }
-
-        .btn-tactile:active {
-            transform: translateY(2px);
-            border-bottom-width: 1px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
-        }
-
-        /* Specific Status Colors */
         .status-red { color: var(--blood-red); font-weight: bold; }
         .status-green { color: var(--heal-green); font-weight: bold; }
 
-        /* Map Styles */
+        /* Map & Diagram Styles */
         .map-container {
-            position: relative;
-            background: #d2b48c;
-            border: 8px solid #2b261e;
+            position: relative; background: #d2b48c; border: 8px solid #2b261e;
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
-
         .hotspot {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background: rgba(138, 28, 28, 0.6);
-            border: 2px solid #fff;
-            border-radius: 50%;
-            cursor: pointer;
-            animation: pulse 2s infinite;
+            position: absolute; width: 24px; height: 24px;
+            background: rgba(138, 28, 28, 0.6); border: 2px solid #fff;
+            border-radius: 50%; cursor: pointer; animation: pulse 2s infinite;
         }
+        .modal { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(5px); }
 
-        .modal {
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(5px);
-        }
-
-        /* Image Treatments */
         .photo-gritty {
             filter: sepia(0.6) contrast(1.2) brightness(0.8) grayscale(0.4);
-            border: 4px solid #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
         
         .scan-line {
             background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-            background-size: 100% 4px;
-            position: absolute; inset: 0; pointer-events: none; z-index: 10; opacity: 0.3;
+            background-size: 100% 4px; position: absolute; inset: 0; pointer-events: none; z-index: 10; opacity: 0.3;
         }
 
-        /* Loader */
         .loader {
-            border: 4px solid #5c5542;
-            border-top: 4px solid #b5a642;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            border: 4px solid #5c5542; border-top: 4px solid #b5a642;
+            border-radius: 50%; width: 40px; height: 40px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- DRAG AND DROP STYLES --- */
+        .drop-zone {
+            position: absolute;
+            width: 80px; height: 80px;
+            border: 3px dashed #b5a642;
+            background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-family: 'Black Ops One', cursive;
+            font-size: 1.5rem; transition: all 0.2s;
+            z-index: 20;
+        }
+        .drop-zone.hover { background: rgba(181, 166, 66, 0.4); border-color: white; }
+        .drop-zone.correct { background: rgba(45, 90, 39, 0.8); border-color: #2d5a27; }
+        
+        .draggable-item {
+            background: #f0ebe0; color: #1a1a1a;
+            padding: 8px; margin-bottom: 8px;
+            border: 1px solid #5c5542; border-left: 4px solid #8a1c1c;
+            cursor: grab; font-size: 0.75rem; font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+        .draggable-item:active { cursor: grabbing; }
+        .draggable-item.hidden-drag { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
     
-    <!-- FX Overlay for Damage/Heal flashes -->
     <div id="fx-overlay"></div>
 
     <div id="game-container" class="w-full p-4 md:p-8 flex items-center justify-center min-h-screen">
         
-        <!-- Splash Screen / Historical Intro -->
+        <!-- Splash Screen -->
         <div id="splash" class="max-w-4xl w-full">
             <div class="game-card p-8 md:p-12 transform rotate-1">
-                <!-- Header -->
                 <div class="text-center border-b-4 border-double border-stone-800 pb-6 mb-8">
                     <h2 class="text-xs font-bold mb-2 uppercase text-stone-700 tracking-[0.5em]">Restricted Access</h2>
                     <h1 class="text-5xl md:text-7xl stencil mb-4 text-[#2b261e] leading-none drop-shadow-sm">Over There</h1>
                     <div class="bg-stone-800 text-[#d3cbb8] inline-block px-4 py-1 text-sm uppercase font-bold tracking-widest transform -rotate-1">Frontline Simulation</div>
                 </div>
-
-                <!-- Body Text -->
                 <div class="grid md:grid-cols-12 gap-10">
                     <div class="md:col-span-7 space-y-6 text-sm md:text-base leading-relaxed font-bold text-[#2b261e]">
                         <p class="typewriter text-lg">SOLDIER:</p>
                         <p>You are deploying to the Western Front. Conditions are hazardous. Survival rates are low.</p>
-                        <p>The mud will slow you. The gas will choke you. The enemy is waiting.</p>
-                        
                         <div class="bg-[#bdaea1] p-4 border-2 border-dashed border-stone-700 my-6 shadow-inner">
                             <h3 class="stencil text-lg mb-2 text-[#8a1c1c] uppercase">General Orders</h3>
                             <ul class="list-decimal pl-5 space-y-2 text-xs font-bold text-stone-900 font-mono">
@@ -199,12 +167,10 @@
                             </ul>
                         </div>
                     </div>
-                    
                     <div class="md:col-span-5 flex flex-col justify-between items-center text-center pl-4 border-l-2 border-stone-400 border-dashed">
                         <div class="mb-6 rotate-3 border-4 border-[#8a1c1c] p-2">
                              <span class="text-[#8a1c1c] font-black text-xl uppercase tracking-widest block px-2">Classified</span>
                         </div>
-                        
                         <div class="space-y-2 mb-8 w-full">
                              <div class="text-left text-xs uppercase font-bold text-stone-500">Authorized By:</div>
                             <p class="font-handwriting text-3xl font-serif italic text-[#1a1a1a] border-b border-black pb-2">John J. Pershing</p>
@@ -261,7 +227,6 @@
                     <div class="flex-grow md:flex-grow-0">
                         <span class="text-[10px] uppercase font-bold text-[#2b261e] tracking-widest block mb-1">Vitality</span>
                         <div class="w-full md:w-64 h-6 bg-[#1a1814] border-2 border-[#5c5542] relative">
-                            <!-- Tick marks -->
                             <div class="absolute inset-0 flex justify-between px-1">
                                 <div class="w-px h-full bg-white/10"></div><div class="w-px h-full bg-white/10"></div><div class="w-px h-full bg-white/10"></div>
                             </div>
@@ -288,14 +253,31 @@
                         <div class="scan-line"></div>
                         <!-- The Image -->
                         <img id="round-image" src="" alt="War" class="w-full h-full object-cover photo-gritty transition-all duration-1000">
+                        
+                        <!-- DROP ZONES CONTAINER (Hidden by default) -->
+                        <div id="diagram-overlay" class="absolute inset-0 hidden z-30">
+                            <!-- Drop Zones: Adjust top/left percentages to match your Diagram1.png -->
+                            <div class="drop-zone" id="zone-A" style="top: 20%; left: 15%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="parapet">A</div>
+                            <div class="drop-zone" id="zone-B" style="top: 50%; left: 20%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="firestep">B</div>
+                            <div class="drop-zone" id="zone-C" style="top: 85%; left: 40%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="duckboards">C</div>
+                            <div class="drop-zone" id="zone-D" style="top: 60%; left: 70%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="dugout">D</div>
+                        </div>
                     </div>
                     
                     <div class="game-card p-8">
                          <div class="absolute -top-3 -left-1 bg-[#2b261e] text-[#dcd5c7] px-3 py-1 text-[10px] font-bold uppercase tracking-widest border border-[#5c5542]">SitRep</div>
                         <h2 id="round-title" class="text-2xl typewriter font-bold mb-4 text-[#1a1a1a] border-b-2 border-[#5c5542] pb-2 border-dotted">Loading...</h2>
                         <p id="round-text" class="text-lg leading-relaxed mb-8 text-[#1a1a1a] font-bold font-mono"></p>
-                        <div id="options-container" class="flex flex-col gap-3">
-                            <!-- Decisions -->
+                        
+                        <!-- Standard Options -->
+                        <div id="options-container" class="flex flex-col gap-3"></div>
+                        
+                        <!-- Drag Items Container (Hidden by default) -->
+                        <div id="diagram-items" class="hidden grid grid-cols-2 gap-2">
+                            <div id="drag1" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="firestep">Raised platform for shooting</div>
+                            <div id="drag2" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="duckboards">Wooden slats to keep feet dry</div>
+                            <div id="drag3" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="parapet">Protective earthen wall</div>
+                            <div id="drag4" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="dugout">Underground shelter</div>
                         </div>
                     </div>
                 </div>
@@ -327,32 +309,19 @@
 
         <!-- MODALS -->
         <div id="map-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-6">
+            <!-- (Map Modal Content - Same as before) -->
             <div class="map-container w-full max-w-4xl p-6 bg-[#d2b48c]">
                 <div class="flex justify-between items-center mb-4 border-b-2 border-[#2b261e] pb-2">
                     <h2 class="text-2xl stencil text-[#2b261e]">Tactical Map</h2>
-                    <div class="flex gap-4 items-center">
-                        <label for="map-upload" class="cursor-pointer btn-tactile py-1 px-3 text-[10px]">
-                             <i class="fa-solid fa-upload"></i> Custom Map
-                        </label>
-                        <input type="file" id="map-upload" class="hidden" accept="image/*" onchange="handleMapUpload(event)">
-                        <button onclick="toggleMap()" class="text-[#2b261e] text-3xl hover:text-[#8a1c1c] transition">&times;</button>
-                    </div>
+                    <button onclick="toggleMap()" class="text-[#2b261e] text-3xl hover:text-[#8a1c1c] transition">&times;</button>
                 </div>
-                <div class="relative w-full aspect-video bg-[#c2b280] border-2 border-[#2b261e] overflow-hidden shadow-inner flex items-center justify-center" id="map-view-area">
-                    <!-- Default Map Image (Replaced SVG) -->
-                    <img id="default-map-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Western_Front_1918_Avg.jpg/1200px-Western_Front_1918_Avg.jpg" alt="Western Front Map" class="w-full h-full object-cover absolute inset-0 mix-blend-multiply opacity-80 filter sepia-[.3] contrast-125">
-                    
-                    <!-- Container for Custom Map Image -->
-                    <img id="custom-map-img" class="absolute inset-0 w-full h-full object-cover hidden mix-blend-multiply opacity-80">
-                    
-                    <!-- Hotspots adjusted roughly to map locations -->
+                <div class="relative w-full aspect-video bg-[#c2b280] border-2 border-[#2b261e] overflow-hidden shadow-inner flex items-center justify-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Western_Front_1918_Avg.jpg/1200px-Western_Front_1918_Avg.jpg" class="w-full h-full object-cover absolute inset-0 mix-blend-multiply opacity-80 filter sepia-[.3] contrast-125">
                     <div class="hotspot" style="top: 35%; left: 35%;" onclick="showInfo('The Somme', 'Devastated by years of conflict.')"></div>
                     <div class="hotspot" style="top: 55%; left: 45%;" onclick="showInfo('Belleau Wood', 'U.S. Marines pushing through heavy timber.')"></div>
                     <div class="hotspot" style="top: 65%; left: 60%;" onclick="showInfo('Meuse-Argonne', 'The final bloody offensive.')"></div>
                 </div>
-                <div id="map-info" class="mt-4 p-3 bg-[#2b261e] text-[#dcd5c7] text-sm text-center font-mono border border-[#5c5542]">
-                    > SELECT SECTOR FOR INTEL
-                </div>
+                <div id="map-info" class="mt-4 p-3 bg-[#2b261e] text-[#dcd5c7] text-sm text-center font-mono border border-[#5c5542]">> SELECT SECTOR</div>
             </div>
         </div>
 
@@ -362,42 +331,25 @@
                 <h1 id="end-title" class="text-6xl stencil mb-6 text-[#2b261e] uppercase">M.I.A.</h1>
                 <p id="end-description" class="text-xl mb-10 leading-relaxed text-stone-800 font-bold font-mono"></p>
                 <div id="stats-summary" class="bg-[#bdaea1] p-6 mb-10 border border-stone-600 shadow-inner"></div>
-                <button onclick="location.reload()" class="w-full btn-tactile py-5 text-xl">
-                    <i class="fa-solid fa-rotate-left"></i> Re-Enlist
-                </button>
+                <button onclick="location.reload()" class="w-full btn-tactile py-5 text-xl"><i class="fa-solid fa-rotate-left"></i> Re-Enlist</button>
             </div>
         </div>
     </div>
+    
+    <div class="fixed bottom-2 right-2 text-[10px] text-stone-600 opacity-50 pointer-events-none z-[9999] font-mono">Frontline Edition v2.1</div>
 
     <script>
-        let gameState = {
-            round: 0,
-            health: 10,
-            maxHealth: 10,
-            role: '',
-            history: []
-        };
+        let gameState = { round: 0, health: 10, maxHealth: 10, role: '', correctDrops: 0 };
 
-        // --- FX SYSTEM ---
         function triggerFX(type) {
             const overlay = document.getElementById('fx-overlay');
             const body = document.body;
-
             if (type === 'damage') {
-                // 1. Shake
-                body.classList.remove('shake-effect');
-                void body.offsetWidth; // Trigger reflow
-                body.classList.add('shake-effect');
-                
-                // 2. Flash Red
-                overlay.style.backgroundColor = 'red';
-                overlay.style.opacity = '0.4';
+                body.classList.remove('shake-effect'); void body.offsetWidth; body.classList.add('shake-effect');
+                overlay.style.backgroundColor = 'red'; overlay.style.opacity = '0.4';
                 setTimeout(() => { overlay.style.opacity = '0'; }, 100);
-            } 
-            else if (type === 'heal') {
-                // Flash Green
-                overlay.style.backgroundColor = 'green';
-                overlay.style.opacity = '0.3';
+            } else if (type === 'heal') {
+                overlay.style.backgroundColor = 'green'; overlay.style.opacity = '0.3';
                 setTimeout(() => { overlay.style.opacity = '0'; }, 150);
             }
         }
@@ -412,6 +364,13 @@
                     { text: "Orient yourself with the maps", health: 0, outcome: "You memorize the fallback lines and bunker locations.", fate: "No physical change, but focus is high." },
                     { text: "Try to steal a nap in the mud", health: +1, outcome: "You catch 20 minutes of rest despite the shelling.", fate: "Recuperated (+1 HP)." }
                 ]
+            },
+            // --- NEW DIAGRAM ROUND ---
+            {
+                type: "diagram",
+                title: "Training: Trench Anatomy",
+                text: "Before taking the night watch, prove you know the layout. Drag the tactical descriptions to the correct Labels (A, B, C, D) on the diagram.",
+                image: "Diagram1.png"
             },
             {
                 title: "Sector 2: Night Watch",
@@ -511,25 +470,6 @@
             }
         ];
 
-        function handleMapUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const defaultMap = document.getElementById('default-map-img');
-                const customMap = document.getElementById('custom-map-img');
-                
-                // Hide Default, show Custom
-                if(defaultMap) defaultMap.classList.add('hidden');
-                if(customMap) {
-                    customMap.src = e.target.result;
-                    customMap.classList.remove('hidden');
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
         function startGame() {
             document.getElementById('splash').classList.add('hidden');
             document.getElementById('role-selection').classList.remove('hidden');
@@ -550,93 +490,119 @@
             const titleElem = document.getElementById('round-title'); 
             const textElem = document.getElementById('round-text');
             const imageElem = document.getElementById('round-image');
+            const optionsContainer = document.getElementById('options-container');
+            const diagramOverlay = document.getElementById('diagram-overlay');
+            const diagramItems = document.getElementById('diagram-items');
 
-            if(roundNumElem) roundNumElem.innerText = (gameState.round + 1).toString().padStart(2, '0');
-            if(titleElem) titleElem.innerText = round.title;
-            if(textElem) textElem.innerText = round.text;
+            // Update UI Text
+            roundNumElem.innerText = (gameState.round + 1).toString().padStart(2, '0');
+            titleElem.innerText = round.title;
+            textElem.innerText = round.text;
+            imageElem.src = round.image;
+            imageElem.classList.remove('photo-gritty'); 
             
-            // Reset Image State
-            if(imageElem) {
-                imageElem.src = round.image;
-                imageElem.classList.add('photo-gritty'); 
-            }
+            // Clear previous content
+            optionsContainer.innerHTML = '';
 
-            const container = document.getElementById('options-container');
-            if(container) {
-                container.innerHTML = '';
+            // Handle Diagram Logic
+            if (round.type === 'diagram') {
+                imageElem.classList.remove('photo-gritty'); // Clear filter for clarity
+                diagramOverlay.classList.remove('hidden');
+                diagramItems.classList.remove('hidden');
+                gameState.correctDrops = 0; // Reset counter
+            } else {
+                imageElem.classList.add('photo-gritty');
+                diagramOverlay.classList.add('hidden');
+                diagramItems.classList.add('hidden');
+                
+                // Render Standard Options
                 round.options.forEach((opt, i) => {
                     const btn = document.createElement('button');
-                    // Tactile Option Buttons
                     btn.className = "btn-tactile w-full text-left p-4 rounded-none group text-sm flex items-start gap-3";
                     btn.innerHTML = `<span class="bg-[#1a1814] text-[#b5a642] px-2 py-1 text-xs border border-[#5c5542]">${i+1}</span> <span>${opt.text}</span>`;
                     btn.onclick = () => makeDecision(opt);
-                    container.appendChild(btn);
+                    optionsContainer.appendChild(btn);
                 });
             }
 
             updateHUD();
         }
 
+        // --- DRAG AND DROP LOGIC ---
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.dataset.val); ev.dataTransfer.setData("id", ev.target.id); }
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedId = ev.dataTransfer.getData("id");
+            const targetCorrect = ev.target.dataset.correct;
+
+            if (data === targetCorrect) {
+                // Correct Drop
+                ev.target.classList.add('correct');
+                ev.target.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                document.getElementById(draggedId).classList.add('hidden-drag');
+                gameState.correctDrops++;
+                
+                if (gameState.correctDrops === 4) {
+                    // All Correct - Advance
+                    setTimeout(() => {
+                        alert("TRAINING COMPLETE. SECTOR CLEARED.");
+                        document.querySelectorAll('.drop-zone').forEach(el => {
+                            el.classList.remove('correct'); 
+                            el.innerHTML = el.id.split('-')[1]; // Reset to A,B,C,D
+                        });
+                        document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('hidden-drag'));
+                        gameState.round++;
+                        renderRound();
+                    }, 500);
+                }
+            } else {
+                // Incorrect
+                triggerFX('damage');
+                alert("INCORRECT PLACEMENT. CHECK YOUR MANUAL.");
+            }
+        }
+
         function makeDecision(opt) {
             const prevHealth = gameState.health;
             gameState.health += opt.health;
-            
             if (gameState.role === 'Medic' && opt.health >= 0) {
                 gameState.health = Math.min(gameState.health + 1, gameState.maxHealth);
             }
-
-            // TRIGGER FX
             if (gameState.health < prevHealth) triggerFX('damage');
             else if (gameState.health > prevHealth) triggerFX('heal');
             
             const fatePanel = document.getElementById('fate-content');
-            if(fatePanel) {
-                // Prepend log so newest is top
-                const logEntry = `
-                    <div class="border-b border-stone-400 pb-2 mb-2 animate-pulse">
-                        <div class="text-[#2b261e] font-bold mb-1">> ${opt.outcome}</div>
-                        <div class="text-[10px] text-stone-600 uppercase tracking-widest">${opt.fate}</div>
-                        <div class="text-xs ${opt.health < 0 ? 'status-red' : 'status-green'} mt-1">
-                            [${opt.health > 0 ? '+' : ''}${opt.health} VITALITY]
-                        </div>
-                    </div>
-                `;
-                fatePanel.innerHTML = logEntry + fatePanel.innerHTML;
-            }
+            fatePanel.innerHTML = `
+                <div class="border-b border-stone-400 pb-2 mb-2 animate-pulse">
+                    <div class="text-[#2b261e] font-bold mb-1">> ${opt.outcome}</div>
+                    <div class="text-[10px] text-stone-600 uppercase tracking-widest">${opt.fate}</div>
+                    <div class="text-xs ${opt.health < 0 ? 'status-red' : 'status-green'} mt-1">[${opt.health > 0 ? '+' : ''}${opt.health} VITALITY]</div>
+                </div>` + fatePanel.innerHTML;
 
-            if (gameState.health <= 0) {
-                setTimeout(() => endGame("Killed in Action"), 600);
-                return;
-            }
+            if (gameState.health <= 0) { setTimeout(() => endGame("Killed in Action"), 600); return; }
 
             const round = ROUNDS[gameState.round];
-            if (round.challenge) {
-                triggerChallenge(round.challenge);
-            } else {
-                showNextBtn();
-            }
+            if (round.challenge) triggerChallenge(round.challenge);
+            else showNextBtn();
             updateHUD();
         }
 
         function triggerChallenge(c) {
             const ui = document.getElementById('dice-roll-ui');
             const btn = document.getElementById('roll-btn');
-            if(ui) ui.classList.remove('hidden');
-            if(btn) {
-                btn.onclick = () => {
-                    const valElem = document.getElementById('dice-value');
-                    let spinCount = 0;
-                    const spinInterval = setInterval(() => {
-                        valElem.innerText = Math.floor(Math.random() * 12) + 1;
-                        spinCount++;
-                        if (spinCount > 10) {
-                            clearInterval(spinInterval);
-                            finalizeRoll(c);
-                        }
-                    }, 80);
-                    btn.disabled = true;
-                };
-            }
+            ui.classList.remove('hidden');
+            btn.onclick = () => {
+                const valElem = document.getElementById('dice-value');
+                let spinCount = 0;
+                const spinInterval = setInterval(() => {
+                    valElem.innerText = Math.floor(Math.random() * 12) + 1;
+                    spinCount++;
+                    if (spinCount > 10) { clearInterval(spinInterval); finalizeRoll(c); }
+                }, 80);
+                btn.disabled = true;
+            };
         }
 
         function finalizeRoll(c) {
@@ -645,51 +611,26 @@
              const fateContent = document.getElementById('fate-content');
              const ui = document.getElementById('dice-roll-ui');
              const btn = document.getElementById('roll-btn');
-
-             if(diceValElem) diceValElem.innerText = roll;
+             diceValElem.innerText = roll;
              
-             // Color Feedback on Dice
-             if (roll >= c.difficulty) {
-                 diceValElem.style.borderColor = '#2d5a27';
-                 diceValElem.style.color = '#2d5a27';
-                 triggerFX('heal');
-             } else {
-                 diceValElem.style.borderColor = '#8a1c1c';
-                 diceValElem.style.color = '#8a1c1c';
-                 triggerFX('damage'); // Damage shake on fail
-             }
+             if (roll >= c.difficulty) { diceValElem.style.borderColor = '#2d5a27'; diceValElem.style.color = '#2d5a27'; triggerFX('heal'); }
+             else { diceValElem.style.borderColor = '#8a1c1c'; diceValElem.style.color = '#8a1c1c'; triggerFX('damage'); }
 
              setTimeout(() => {
                 let hpChange = 0;
                 if (roll >= c.difficulty) {
                     hpChange = (c.success.includes("+2 HP") ? 2 : (c.success.includes("+1 HP") ? 1 : 0));
                     gameState.health += hpChange;
-                    fateContent.innerHTML = `
-                        <div class="border-b border-stone-400 pb-2 mb-2">
-                             <div class="text-[#2d5a27] font-black uppercase mb-1">> ROLL: ${roll} (REQ: ${c.difficulty})</div>
-                             <div class="text-xs text-[#2b261e]">${c.success}</div>
-                        </div>` + fateContent.innerHTML;
+                    fateContent.innerHTML = `<div class="border-b border-stone-400 pb-2 mb-2"><div class="text-[#2d5a27] font-black uppercase mb-1">> ROLL: ${roll} (REQ: ${c.difficulty})</div><div class="text-xs text-[#2b261e]">${c.success}</div></div>` + fateContent.innerHTML;
                 } else {
                     hpChange = (c.fail.includes("-2 HP") ? -2 : -1);
                     gameState.health += hpChange;
-                    fateContent.innerHTML = `
-                        <div class="border-b border-stone-400 pb-2 mb-2">
-                             <div class="text-[#8a1c1c] font-black uppercase mb-1">> ROLL: ${roll} (REQ: ${c.difficulty})</div>
-                             <div class="text-xs text-[#2b261e]">${c.fail}</div>
-                        </div>` + fateContent.innerHTML;
+                    fateContent.innerHTML = `<div class="border-b border-stone-400 pb-2 mb-2"><div class="text-[#8a1c1c] font-black uppercase mb-1">> ROLL: ${roll} (REQ: ${c.difficulty})</div><div class="text-xs text-[#2b261e]">${c.fail}</div></div>` + fateContent.innerHTML;
                 }
-                
-                // Extra shake if damage taken from roll
                 if(hpChange < 0) triggerFX('damage');
-
                 setTimeout(() => {
-                    if(ui) ui.classList.add('hidden');
-                    btn.disabled = false;
-                    if(diceValElem) {
-                        diceValElem.innerText = "?";
-                        diceValElem.style.borderColor = '#2b261e';
-                        diceValElem.style.color = '#2b261e';
-                    }
+                    ui.classList.add('hidden'); btn.disabled = false;
+                    diceValElem.innerText = "?"; diceValElem.style.borderColor = '#2b261e'; diceValElem.style.color = '#2b261e';
                     updateHUD();
                     if (gameState.health <= 0) endGame("Fell in Battle");
                     else showNextBtn();
@@ -699,87 +640,42 @@
 
         function showNextBtn() {
             const container = document.getElementById('options-container');
-            if(container) {
-                container.innerHTML = '';
-                const btn = document.createElement('button');
-                btn.className = "btn-tactile w-full py-4 text-center mt-4 border-l-4 border-[#b5a642]";
-                btn.innerHTML = `<i class="fa-solid fa-forward mr-2"></i> ${gameState.round === 9 ? "FINAL PUSH" : "ADVANCE TO NEXT SECTOR"}`;
-                btn.onclick = () => {
-                    gameState.round++;
-                    if (gameState.round >= ROUNDS.length) determineFinalEnd();
-                    else renderRound();
-                };
-                container.appendChild(btn);
-            }
+            container.innerHTML = '';
+            const btn = document.createElement('button');
+            btn.className = "btn-tactile w-full py-4 text-center mt-4 border-l-4 border-[#b5a642]";
+            btn.innerHTML = `<i class="fa-solid fa-forward mr-2"></i> ${gameState.round === 9 ? "FINAL PUSH" : "ADVANCE TO NEXT SECTOR"}`;
+            btn.onclick = () => { gameState.round++; if (gameState.round >= ROUNDS.length) determineFinalEnd(); else renderRound(); };
+            container.appendChild(btn);
         }
 
         function updateHUD() {
             const pct = (gameState.health / gameState.maxHealth) * 100;
             const bar = document.getElementById('health-bar');
-            if(bar) {
-                bar.style.width = `${Math.max(0, pct)}%`;
-                // Color shift based on HP
-                if(pct < 30) bar.style.backgroundColor = '#8a1c1c';
-                else if(pct < 60) bar.style.backgroundColor = '#b5a642';
-                else bar.style.backgroundColor = '#2d5a27';
-            }
+            bar.style.width = `${Math.max(0, pct)}%`;
+            if(pct < 30) bar.style.backgroundColor = '#8a1c1c';
+            else if(pct < 60) bar.style.backgroundColor = '#b5a642';
+            else bar.style.backgroundColor = '#2d5a27';
         }
 
         function determineFinalEnd() {
             let title = "", desc = "";
-            if (gameState.health >= 8) {
-                title = "Distinguished Service";
-                desc = "You returned home a hero, though the sound of the guns never truly left you. You spent your life advocating for your fellow veterans.";
-            } else if (gameState.health >= 4) {
-                title = "Honorable Survivor";
-                desc = "You survived. You returned to your farm or factory, living a quiet life, forever marked by the mud of France.";
-            } else {
-                title = "The Lost Generation";
-                desc = "The war took almost everything from you. You made it home, but the physical and mental scars made the peace feel like a different kind of battle.";
-            }
+            if (gameState.health >= 8) { title = "Distinguished Service"; desc = "You returned home a hero, though the sound of the guns never truly left you. You spent your life advocating for your fellow veterans."; }
+            else if (gameState.health >= 4) { title = "Honorable Survivor"; desc = "You survived. You returned to your farm or factory, living a quiet life, forever marked by the mud of France."; }
+            else { title = "The Lost Generation"; desc = "The war took almost everything from you. You made it home, but the physical and mental scars made the peace feel like a different kind of battle."; }
             endGame(title, desc);
         }
 
         function endGame(title, desc) {
-            const ui = document.getElementById('game-ui');
-            const end = document.getElementById('end-screen');
-            if(ui) ui.classList.add('hidden');
-            if(end) {
-                end.classList.remove('hidden');
-                document.getElementById('end-title').innerText = title;
-                document.getElementById('end-description').innerText = desc || "Your journey ends in the soil of the Western Front. You are gone, but not forgotten.";
-                document.getElementById('stats-summary').innerHTML = `
-                    <div class="grid grid-cols-2 gap-8 text-left">
-                        <div><span class="text-[10px] text-stone-600 uppercase tracking-widest block">Unit</span><p class="text-xl font-bold text-[#2b261e]">${gameState.role}</p></div>
-                        <div><span class="text-[10px] text-stone-600 uppercase tracking-widest block">Sectors Cleared</span><p class="text-xl font-bold text-[#2b261e]">${gameState.round + 1}</p></div>
-                    </div>
-                `;
-            }
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('end-title').innerText = title;
+            document.getElementById('end-description').innerText = desc || "Your journey ends in the soil of the Western Front. You are gone, but not forgotten.";
+            document.getElementById('stats-summary').innerHTML = `<div class="grid grid-cols-2 gap-8 text-left"><div><span class="text-[10px] text-stone-600 uppercase tracking-widest block">Unit</span><p class="text-xl font-bold text-[#2b261e]">${gameState.role}</p></div><div><span class="text-[10px] text-stone-600 uppercase tracking-widest block">Sectors Cleared</span><p class="text-xl font-bold text-[#2b261e]">${gameState.round + 1}</p></div></div>`;
         }
 
-        function toggleMap() { 
-            const modal = document.getElementById('map-modal');
-            if(modal) modal.classList.toggle('hidden'); 
-        }
-        
-        function toggleManual() { 
-            const msg = document.createElement('div');
-            msg.className = "fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm";
-            msg.innerHTML = `
-                <div class="game-card p-8 max-w-md w-full shadow-2xl relative rotate-1">
-                     <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#2b261e] text-[#dcd5c7] px-3 py-1 text-[10px] uppercase tracking-widest font-bold border border-[#5c5542]">Official Orders</div>
-                    <h4 class="stencil text-[#8a1c1c] text-2xl mb-4 uppercase tracking-widest border-b border-[#5c5542] pb-2 text-center">General Orders</h4>
-                    <p class="text-[#2b261e] mb-6 font-mono font-bold leading-relaxed">1. Hold the line at all costs.<br>2. Watch for gas at all hours.<br>3. Keep your rifle clean and your spirits high.</p>
-                    <button onclick="this.parentElement.parentElement.remove()" class="w-full btn-tactile py-3">Acknowledge</button>
-                </div>
-            `;
-            document.body.appendChild(msg);
-        }
-        
-        function showInfo(t, i) { 
-            const info = document.getElementById('map-info');
-            if(info) info.innerHTML = `<strong>${t}:</strong> ${i}`; 
-        }
+        function toggleMap() { document.getElementById('map-modal').classList.toggle('hidden'); }
+        function toggleManual() { document.body.insertAdjacentHTML('beforeend', `<div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"><div class="game-card p-8 max-w-md w-full shadow-2xl relative rotate-1"><div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#2b261e] text-[#dcd5c7] px-3 py-1 text-[10px] uppercase tracking-widest font-bold border border-[#5c5542]">Official Orders</div><h4 class="stencil text-[#8a1c1c] text-2xl mb-4 uppercase tracking-widest border-b border-[#5c5542] pb-2 text-center">General Orders</h4><p class="text-[#2b261e] mb-6 font-mono font-bold leading-relaxed">1. Hold the line at all costs.<br>2. Watch for gas at all hours.<br>3. Keep your rifle clean and your spirits high.</p><button onclick="this.parentElement.parentElement.remove()" class="w-full btn-tactile py-3">Acknowledge</button></div></div>`); }
+        function showInfo(t, i) { document.getElementById('map-info').innerHTML = `<strong>${t}:</strong> ${i}`; }
 
         window.onload = function() {
             console.log("War Simulation Initialized...");

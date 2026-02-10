@@ -457,6 +457,730 @@
                 text: "A German sniper in a ruined farmhouse is picking off the runners. Your platoon leader asks for a volunteer to crawl out and locate him.",
                 image: "Round7.png",
                 options: [
+                    { 
+                        text: "Volunteer (Scout)", 
+                        health: -1, 
+                        outcome: "You find him, but a bullet grazes your helmet.", 
+                        fate: "Risk taken (-1 HP).",
+                        sound: "Sniper1.mp3" 
+                    },
+                    { 
+                        text: "Stay back and use a periscope", 
+                        health: 0, 
+                        outcome: "You spot the flash safely. The artillery takes care of the rest.", 
+                        fate: "Calculated play.",
+                        sound: "Sniper1.mp3"
+                    },
+                    { 
+                        text: "Try to bait the sniper", 
+                        health: -2, 
+                        outcome: "You raise your hat on a stick. He doesn't fall for it; he shoots through the trench wall instead.", 
+                        fate: "Outsmarted (-2 HP).",
+                        sound: "Sniper1.mp3"
+                    }
+                ],
+                challenge: { type: "dice", difficulty: 7, success: "Sniper neutralized by arty. (Safe)", fail: "Sniper relocates and fires! (-1 HP)" }
+            },
+            {
+                title: "Sector 8: The Fever",
+                text: "The Spanish Influenza is tearing through the camps. You wake up with a 104-degree fever and a cough that brings up blood.",
+                image: "Round8.png",
+                options: [
+                    { text: "Report to the Casualty Clearing Station", health: -2, outcome: "Crowded and miserable, but you get some rest.", fate: "Hospitalized (-2 HP)." },
+                    { text: "Stay on the line", health: -4, outcome: "You collapse in the mud. The pneumonia is brutal.", fate: "Critically ill (-4 HP)." },
+                    { text: "Drink extra rum and water", health: -1, outcome: "You push through, but you're a ghost of yourself.", fate: "Stubborn (-1 HP)." }
+                ]
+            },
+            {
+                title: "Sector 9: The Final Advance",
+                text: "The Hindenburg Line is broken! We are chasing the enemy through a burning forest. It's hand-to-hand combat in the thicket.",
+                image: "Round9.png",
+                options: [
+                    { text: "Lead the bayonet charge", health: -3, outcome: "You take the trench, but you're cut up in the melee.", fate: "Glory at a cost (-3 HP)." },
+                    { text: "Clear out a concrete bunker", health: -1, outcome: "A grenade blast rings your ears permanently.", fate: "Tinnitus (-1 HP)." },
+                    { text: "Flank through the wire", health: -2, outcome: "The barbs tear at your legs, but you get behind them.", fate: "Lacerations (-2 HP)." }
+                ],
+                challenge: { type: "dice", difficulty: 9, success: "Heroic breakthrough! (+2 HP)", fail: "Pinned by machine gun! (-2 HP)" }
+            },
+            {
+                title: "Sector 10: 10:59 AM",
+                text: "The word has come down. The Armistice is signed. At 11:00 AM, the war ends. One minute left. An enemy MG is still firing blindly.",
+                image: "Round10.png",
+                options: [
+                    { text: "Stay low in the dugout", health: 0, outcome: "Silence falls. The birds begin to sing for the first time in years.", fate: "Survivor." },
+                    { text: "Fire one last shot for luck", health: -1, outcome: "The muzzle flash draws fire. You're hit in the arm at 11:00 exactly.", fate: "Tragedy (-1 HP)." },
+                    { text: "Check on your squad", health: 0, outcome: "You find your best friend is still alive. You weep together.", fate: "Humanity." }
+                ]
+            }
+        ];
+
+        function handleMapUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const defaultMap = document.getElementById('default-map-img');
+                const customMap = document.getElementById('custom-map-img');
+                if(defaultMap) defaultMap.classList.add('hidden');
+                if(customMap) {
+                    customMap.src = e.target.result;
+                    customMap.classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function startGame() {
+            // Play Background Theme
+            const bgMusic = new Audio('Theme1.mp3');
+            bgMusic.loop = true;
+            bgMusic.volume = 0.4; // Set volume to 40% so it's not overwhelming
+            bgMusic.play().catch(e => console.log("Audio play failed:", e));
+
+            document.getElementById('splash').classList.add('hidden');
+            document.getElementById('role-selection').classList.remove('hidden');
+        }
+
+        function selectRole(role) {
+            gameState.role = role;
+            gameState.health = (role === 'Infantry') ? 12 : 10;
+            gameState.maxHealth = gameState.health;
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            renderRound();
+        }
+
+        function renderRound() {
+            const round = ROUNDS[gameState.round];
+            const roundNumElem = document.getElementById('round-number');
+            const titleElem = document.getElementById('round-title'); 
+            const textElem = document.getElementById('round-text');
+            const imageElem = document.getElementById('round-image');
+            const optionsContainer = document.getElementById('options-container');
+            const diagramOverlay = document.getElementById('diagram-overlay');
+            const diagramItems = document.getElementById('diagram-items');
+
+            // Update UI Text
+            roundNumElem.innerText = (gameState.round + 1).toString().padStart(2, '0');
+            titleElem.innerText = round.title;
+            textElem.innerText = round.text;
+            imageElem.src = round.image;
+            imageElem.classList.remove('photo-gritty'); 
+            
+            // Clear previous content
+            optionsContainer.innerHTML = '';
+
+            // Handle Diagram Logic
+            if (round.type === 'diagram') {
+                imageElem.classList.remove('photo-gritty'); // Clear filter for clarity
+                diagramOverlay.classList.remove('hidden');
+                diagramItems.classList.remove('hidden');
+                gameState.correctDrops = 0; // Reset counter
+            } else {
+                imageElem.classList.add('photo-gritty');
+                diagramOverlay.classList.add('hidden');
+                diagramItems.classList.add('hidden');
+                
+                // Render Standard Options
+                round.options.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = "btn-tactile w-full text-left p-4 rounded-none group text-sm flex items-start gap-3";
+                    btn.innerHTML = `<span class="bg-[#1a1814] text-[#b5a642] px-2 py-1 text-xs border border-[#5c5542]">${i+1}</span> <span>${opt.text}</span>`;
+                    btn.onclick = () => makeDecision(opt);
+                    optionsContainer.appendChild(btn);
+                });
+            }
+
+            updateHUD();
+        }
+
+        // --- DRAG AND DROP LOGIC ---
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.dataset.val); ev.dataTransfer.setData("id", ev.target.id); }
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedId = ev.dataTransfer.getData("id");
+            const targetCorrect = ev.target.dataset.correct;
+
+            if (data === targetCorrect) {
+                // Correct Drop
+                ev.target.classList.add('correct');
+                ev.target.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                document.getElementById(draggedId).classList.add('hidden-drag');
+                gameState.correctDrops++;
+                
+                if (gameState.correctDrops === 5) { // Updated to require 5 matches
+                    // All Correct - Advance
+                    setTimeout(() => {
+                        alert("TRAINING COMPLETE. SECTOR CLEARED.");
+                        document.querySelectorAll('.drop-zone').forEach(el => {
+                            el.classList.remove('correct'); 
+                            el.innerHTML = el.id.split('-')[1]; // Reset to A,B,C,D,E
+                        });
+                        document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('hidden-drag'));
+                        gameState.round++;
+                        renderRound();
+                    }, 500);
+                }
+            } else {
+                // Incorrect
+                triggerFX('damage');
+                alert("INCORRECT PLACEMENT. CHECK YOUR MANUAL.");
+            }
+        }
+
+        function makeDecision(opt) {
+            // SOUND EFFECT TRIGGER
+            if (opt.sound) {
+                const audio = new Audio(opt.sound);
+                audio.play().catch(e => console.log("Sound failed to play:", e));
+            }
+
+            const prevHealth = gameState.health;
+            gameState.health += opt.health;
+            if (gameState.role === 'Medic' && opt.health >= 0) {
+                gameState.health = Math.min(gameState.health + 1, gameState.maxHealth);
+            }
+            if (gameState.health < prevHealth) triggerFX('damage');
+            else if (gameState.health > prevHealth) triggerFX('heal');
+            
+            const fatePanel = document.getElementById('fate-content');
+            fatePanel.innerHTML = `
+                <div class="border-b border-stone-400 pb-2 mb-2 animate-pulse">
+                    <div class="text-[#2b261e] font-bold mb-1">> ${opt.outcome}</div>
+                    <div class="text-[10px] text-stone-600 uppercase tracking-widest">${opt.fate}</div>
+                    <div class="text-xs ${opt.health < 0 ? 'status-red' : 'status-green'} mt-1">[${opt.health > 0 ? '+' : ''}${opt.health} VITALITY]</div>
+                </div>` + fatePanel.innerHTML;
+
+            if (gameState.health <= 0) { setTimeout(() => endGame("Killed in Action"), 600); return; }
+
+            const round = ROUNDS[gameState.round];
+            if (round.challenge) triggerChallenge(round.challenge);
+            else showNextBtn();
+            updateHUD();
+        }
+
+        function triggerChallenge(c) {
+            const ui = document.getElementById('dice-roll-ui');
+            const btn = document.getElementById('roll-btn');
+            ui.classList.remove('hidden');
+            btn.onclick = () => {
+                const valElem = document.getElementById('dice-value');
+                let spinCount = 0;
+                const spinInterval = setInterval(() => {
+                    valElem.innerText = Math.floor(Math.random() * 12) + 1;
+                    spinCount++;
+                    if (spinCount > 10) { clearInterval(spinInterval); finalizeRoll(c); }
+                }, 80);
+                btn.disabled = true;
+            };
+        }
+
+        function finalizeRoll(c) {
+             const roll = Math.floor(Math.random() * 12) + 1;
+             const diceValElem = document.getElementById('dice-value');
+             const fateContent = document.getElementById('fate-content');
+             const ui = document.getElementById('dice-roll-ui');
+             const btn = document.getElementById('roll-btn');
+             diceValElem.innerText = roll;
+             
+             if (roll >= c.difficulty) { diceValElem.style.borderColor = '#2d5a27'; diceValElem.style.color = '#2d5a27'; triggerFX('heal'); }
+             else { diceValElem.style.borderColor = '#8a1c1c'; diceValElem.style.color = '#8a1c1c'; triggerFX('damage'); }
+
+             setTimeout(() => {
+                let hpChange = 0;
+                if (roll >= c.difficulty) {
+                    hpChange = (c.success.includes("+2 HP") ? 2 : (c.success.includes("+1 HP") ? 1 : 0));
+                    gameState.health += hpChange;
+                    fateContent.innerHTML = `<div class="border-b border-stone-400 pb-2 mb-2"><div class="text-[#2d5a27] font-black uppercase mb-1">> ROLL: ${roll} (REQ: ${c.difficulty})</div><div class="text-xs text-[#2b261e]">${c.success}</div></div>` + fateContent.innerHTML;
+                } else {
+                    hpChange = (c.fail.includes("-2 HP") ? -2 : -1);
+                    gameState.health += hpChange;
+                    fateContent.innerHTML = `<div class="border-b border-stone-400 pb-2 mb-2"><div class="text-[#8a1c1c] font-black uppercase mb-1">> ROLL: ${roll} (REQ: ${c.difficulty})</div><div class="text-xs text-[#2b261e]">${c.fail}</div></div>` + fateContent.innerHTML;
+                }
+                if(hpChange < 0) triggerFX('damage');
+                setTimeout(() => {
+                    ui.classList.add('hidden'); btn.disabled = false;
+                    diceValElem.innerText = "?"; diceValElem.style.borderColor = '#2b261e'; diceValElem.style.color = '#2b261e';
+                    updateHUD();
+                    if (gameState.health <= 0) endGame("Fell in Battle");
+                    else showNextBtn();
+                }, 2000); 
+             }, 500);
+        }
+
+        function showNextBtn() {
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            const btn = document.createElement('button');
+            btn.className = "btn-tactile w-full py-4 text-center mt-4 border-l-4 border-[#b5a642]";
+            btn.innerHTML = `<i class="fa-solid fa-forward mr-2"></i> ${gameState.round === 9 ? "FINAL PUSH" : "ADVANCE TO NEXT SECTOR"}`;
+            btn.onclick = () => { gameState.round++; if (gameState.round >= ROUNDS.length) determineFinalEnd(); else renderRound(); };
+            container.appendChild(btn);
+        }
+
+        function updateHUD() {
+            const pct = (gameState.health / gameState.maxHealth) * 100;
+            const bar = document.getElementById('health-bar');
+            bar.style.width = `${Math.max(0, pct)}%`;
+            if(pct < 30) bar.style.backgroundColor = '#8a1c1c';
+            else if(pct < 60) bar.style.backgroundColor = '#b5a642';
+            else bar.style.backgroundColor = '#2d5a27';
+        }
+
+        function determineFinalEnd() {
+            let title = "", desc = "";
+            if (gameState.health >= 8) { title = "Distinguished Service"; desc = "You returned home a hero, though the sound of the guns never truly left you. You spent your life advocating for your fellow veterans."; }
+            else if (gameState.health >= 4) { title = "Honorable Survivor"; desc = "You survived. You returned to your farm or factory, living a quiet life, forever marked by the mud of France."; }
+            else { title = "The Lost Generation"; desc = "The war took almost everything from you. You made it home, but the physical and mental scars made the peace feel like a different kind of battle."; }
+            endGame(title, desc);
+        }
+
+        function endGame(title, desc) {
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('end-title').innerText = title;
+            document.getElementById('end-description').innerText = desc || "Your journey ends in the soil of the Western Front. You are gone, but not forgotten.";
+            document.getElementById('stats-summary').innerHTML = `<div class="grid grid-cols-2 gap-8 text-left"><div><span class="text-[10px] text-stone-600 uppercase tracking-widest block">Unit</span><p class="text-xl font-bold text-[#2b261e]">${gameState.role}</p></div><div><span class="text-[10px] text-stone-600 uppercase tracking-widest block">Sectors Cleared</span><p class="text-xl font-bold text-[#2b261e]">${gameState.round + 1}</p></div></div>`;
+        }
+
+        function toggleMap() { document.getElementById('map-modal').classList.toggle('hidden'); }
+        function toggleManual() { document.body.insertAdjacentHTML('beforeend', `<div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"><div class="game-card p-8 max-w-md w-full shadow-2xl relative rotate-1"><div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#2b261e] text-[#dcd5c7] px-3 py-1 text-[10px] uppercase tracking-widest font-bold border border-[#5c5542]">Official Orders</div><h4 class="stencil text-[#8a1c1c] text-2xl mb-4 uppercase tracking-widest border-b border-[#5c5542] pb-2 text-center">General Orders</h4><p class="text-[#2b261e] mb-6 font-mono font-bold leading-relaxed">1. Hold the line at all costs.<br>2. Watch for gas at all hours.<br>3. Keep your rifle clean and your spirits high.</p><button onclick="this.parentElement.parentElement.remove()" class="w-full btn-tactile py-3">Acknowledge</button></div></div>`); }
+        function showInfo(t, i) { document.getElementById('map-info').innerHTML = `<strong>${t}:</strong> ${i}`; }
+
+        window.onload = function() {
+            console.log("War Simulation Initialized...");
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('end-screen').classList.add('hidden');
+        };
+    </script>
+</body>
+</html>            min-height: 100vh;
+        }
+
+        /* --- VISUAL FX --- */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .shake-effect { animation: shake 0.4s; animation-iteration-count: 1; }
+
+        #fx-overlay {
+            position: fixed; inset: 0; pointer-events: none; z-index: 100;
+            opacity: 0; transition: opacity 0.1s ease-out; mix-blend-mode: overlay;
+        }
+
+        /* Typography */
+        .typewriter { font-family: 'Special Elite', cursive; }
+        .stencil { font-family: 'Black Ops One', cursive; letter-spacing: 0.1em; }
+
+        /* Game Card */
+        .game-card {
+            background-color: var(--paper-stained);
+            border: 2px solid #5c5542;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.5), 0 0 0 4px rgba(0,0,0,0.2); 
+            position: relative;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+        }
+
+        /* Tactile Buttons */
+        .btn-tactile {
+            background: #3e3a30; color: #dcd5c7;
+            border-bottom: 4px solid #1a1814; border-right: 2px solid #1a1814;
+            border-top: 1px solid #5c5542; border-left: 1px solid #5c5542;
+            transition: all 0.1s; text-transform: uppercase;
+            letter-spacing: 0.1em; font-weight: bold; text-shadow: 1px 1px 0 #000;
+        }
+        .btn-tactile:hover { background: #4a4539; transform: translateY(-1px); }
+        .btn-tactile:active { transform: translateY(2px); border-bottom-width: 1px; }
+
+        .status-red { color: var(--blood-red); font-weight: bold; }
+        .status-green { color: var(--heal-green); font-weight: bold; }
+
+        /* Map & Diagram Styles */
+        .map-container {
+            position: relative; background: #d2b48c; border: 8px solid #2b261e;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+        .hotspot {
+            position: absolute; width: 24px; height: 24px;
+            background: rgba(138, 28, 28, 0.6); border: 2px solid #fff;
+            border-radius: 50%; cursor: pointer; animation: pulse 2s infinite;
+        }
+        .modal { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(5px); }
+
+        .photo-gritty {
+            filter: sepia(0.6) contrast(1.2) brightness(0.8) grayscale(0.4);
+            border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        
+        .scan-line {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px; position: absolute; inset: 0; pointer-events: none; z-index: 10; opacity: 0.3;
+        }
+
+        .loader {
+            border: 4px solid #5c5542; border-top: 4px solid #b5a642;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- DRAG AND DROP STYLES --- */
+        .drop-zone {
+            position: absolute;
+            width: 80px; height: 80px;
+            border: 3px dashed #b5a642;
+            background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-family: 'Black Ops One', cursive;
+            font-size: 1.5rem; transition: all 0.2s;
+            z-index: 20;
+        }
+        .drop-zone.hover { background: rgba(181, 166, 66, 0.4); border-color: white; }
+        .drop-zone.correct { background: rgba(45, 90, 39, 0.8); border-color: #2d5a27; }
+        
+        .draggable-item {
+            background: #f0ebe0; color: #1a1a1a;
+            padding: 8px; margin-bottom: 8px;
+            border: 1px solid #5c5542; border-left: 4px solid #8a1c1c;
+            cursor: grab; font-size: 0.75rem; font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+        .draggable-item:active { cursor: grabbing; }
+        .draggable-item.hidden-drag { opacity: 0.5; pointer-events: none; }
+    </style>
+</head>
+<body>
+    
+    <div id="fx-overlay"></div>
+
+    <div id="game-container" class="w-full p-4 md:p-8 flex items-center justify-center min-h-screen">
+        
+        <!-- Splash Screen -->
+        <div id="splash" class="max-w-4xl w-full">
+            <div class="game-card p-8 md:p-12 transform rotate-1">
+                <div class="text-center border-b-4 border-double border-stone-800 pb-6 mb-8">
+                    <h2 class="text-xs font-bold mb-2 uppercase text-stone-700 tracking-[0.5em]">Restricted Access</h2>
+                    <h1 class="text-5xl md:text-7xl stencil mb-4 text-[#2b261e] leading-none drop-shadow-sm">Over There</h1>
+                    <div class="bg-stone-800 text-[#d3cbb8] inline-block px-4 py-1 text-sm uppercase font-bold tracking-widest transform -rotate-1">Frontline Simulation</div>
+                </div>
+                <div class="grid md:grid-cols-12 gap-10">
+                    <div class="md:col-span-7 space-y-6 text-sm md:text-base leading-relaxed font-bold text-[#2b261e]">
+                        <p class="typewriter text-lg">SOLDIER:</p>
+                        <p>You are deploying to the Western Front. Conditions are hazardous. Survival rates are low.</p>
+                        <div class="bg-[#bdaea1] p-4 border-2 border-dashed border-stone-700 my-6 shadow-inner">
+                            <h3 class="stencil text-lg mb-2 text-[#8a1c1c] uppercase">General Orders</h3>
+                            <ul class="list-decimal pl-5 space-y-2 text-xs font-bold text-stone-900 font-mono">
+                                <li>HOLD THE LINE AT ALL COSTS.</li>
+                                <li>MAINTAIN YOUR RIFLE AND EQUIPMENT.</li>
+                                <li>REPORT ALL ENEMY MOVEMENT.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="md:col-span-5 flex flex-col justify-between items-center text-center pl-4 border-l-2 border-stone-400 border-dashed">
+                        <div class="mb-6 rotate-3 border-4 border-[#8a1c1c] p-2">
+                             <span class="text-[#8a1c1c] font-black text-xl uppercase tracking-widest block px-2">Classified</span>
+                        </div>
+                        <div class="space-y-2 mb-8 w-full">
+                             <div class="text-left text-xs uppercase font-bold text-stone-500">Authorized By:</div>
+                            <p class="font-handwriting text-3xl font-serif italic text-[#1a1a1a] border-b border-black pb-2">John J. Pershing</p>
+                            <p class="text-[10px] uppercase tracking-widest font-bold">General of the Armies</p>
+                        </div>
+                        <button onclick="startGame()" class="w-full btn-tactile py-4 px-6 text-xl shadow-xl group relative overflow-hidden">
+                            <i class="fa-solid fa-play mr-2 text-yellow-600"></i> Deploy Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Selection -->
+        <div id="role-selection" class="hidden text-center max-w-5xl w-full mx-auto">
+            <h2 class="text-4xl stencil mb-12 text-[#d3cbb8] uppercase tracking-widest drop-shadow-md">Choose Class</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+                <div onclick="selectRole('Infantry')" class="game-card p-8 cursor-pointer hover:bg-[#c2b280] transition-all transform hover:-translate-y-2 hover:rotate-1">
+                    <div class="bg-[#3e3a30] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#b5a642] shadow-lg">
+                        <i class="fa-solid fa-person-rifle text-3xl text-[#dcd5c7]"></i>
+                    </div>
+                    <h3 class="stencil text-2xl mb-2 text-[#2b261e]">Infantry</h3>
+                    <div class="h-1 w-12 bg-[#8a1c1c] mx-auto mb-4"></div>
+                    <p class="text-xs font-bold leading-relaxed">Standard Issue. <br>12 HP. <br>Frontline Fighter.</p>
+                </div>
+                <div onclick="selectRole('Medic')" class="game-card p-8 cursor-pointer hover:bg-[#c2b280] transition-all transform hover:-translate-y-2 hover:rotate-1">
+                     <div class="bg-[#3e3a30] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#8a1c1c] shadow-lg">
+                        <i class="fa-solid fa-briefcase-medical text-3xl text-[#dcd5c7]"></i>
+                    </div>
+                    <h3 class="stencil text-2xl mb-2 text-[#8a1c1c]">Medic</h3>
+                    <div class="h-1 w-12 bg-[#8a1c1c] mx-auto mb-4"></div>
+                    <p class="text-xs font-bold leading-relaxed">Support Unit. <br>10 HP. <br>Passive Healing.</p>
+                </div>
+                <div onclick="selectRole('Hellfighter')" class="game-card p-8 cursor-pointer hover:bg-[#c2b280] transition-all transform hover:-translate-y-2 hover:rotate-1">
+                     <div class="bg-[#3e3a30] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#1e3a8a] shadow-lg">
+                        <i class="fa-solid fa-shield-halved text-3xl text-[#dcd5c7]"></i>
+                    </div>
+                    <h3 class="stencil text-2xl mb-2 text-[#1e3a8a]">Hellfighter</h3>
+                    <div class="h-1 w-12 bg-[#8a1c1c] mx-auto mb-4"></div>
+                    <p class="text-xs font-bold leading-relaxed">Elite Unit. <br>10 HP. <br>Night Ops Bonus.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div id="game-ui" class="hidden w-full max-w-6xl flex flex-col gap-6">
+            <!-- HUD -->
+            <div class="flex flex-col md:flex-row justify-between items-center game-card p-4 z-20">
+                <div class="flex items-center gap-8 mb-4 md:mb-0 w-full md:w-auto">
+                    <div class="text-center bg-[#2b261e] p-2 border border-stone-600 rounded">
+                        <span class="text-[8px] uppercase text-stone-400 tracking-widest block mb-1">Sector</span>
+                        <div id="round-number" class="text-3xl stencil text-[#b5a642]">01</div>
+                    </div>
+                    <div class="flex-grow md:flex-grow-0">
+                        <span class="text-[10px] uppercase font-bold text-[#2b261e] tracking-widest block mb-1">Vitality</span>
+                        <div class="w-full md:w-64 h-6 bg-[#1a1814] border-2 border-[#5c5542] relative">
+                            <div class="absolute inset-0 flex justify-between px-1">
+                                <div class="w-px h-full bg-white/10"></div><div class="w-px h-full bg-white/10"></div><div class="w-px h-full bg-white/10"></div>
+                            </div>
+                            <div id="health-bar" class="health-bar-fill h-full bg-[#2d5a27]" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleMap()" class="btn-tactile py-2 px-4 text-xs">
+                        <i class="fa-solid fa-map"></i> Map
+                    </button>
+                    <button onclick="toggleManual()" class="btn-tactile py-2 px-4 text-xs">
+                        <i class="fa-solid fa-file-invoice"></i> Orders
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left Narrative -->
+                <div class="lg:col-span-8 flex flex-col gap-6">
+                    <!-- Image Area -->
+                    <div id="image-area" class="w-full aspect-[21/9] bg-[#0c0a09] border-4 border-[#2b261e] shadow-2xl relative group overflow-hidden">
+                        <div class="scan-line"></div>
+                        <!-- The Image -->
+                        <img id="round-image" src="" alt="War" class="w-full h-full object-cover photo-gritty transition-all duration-1000">
+                        
+                        <!-- DROP ZONES CONTAINER (Hidden by default) -->
+                        <div id="diagram-overlay" class="absolute inset-0 hidden z-30">
+                            <!-- E: No Man's Land (Top) -->
+                            <div class="drop-zone" id="zone-E" style="top: 5%; left: 45%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="nomansland">E</div>
+                            
+                            <!-- D: Barbed Wire (Below E) -->
+                            <div class="drop-zone" id="zone-D" style="top: 20%; left: 60%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="barbedwire">D</div>
+
+                            <!-- A: Parapet -->
+                            <div class="drop-zone" id="zone-A" style="top: 10%; left: 10%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="parapet">A</div>
+                            
+                            <!-- B: Fire Step -->
+                            <div class="drop-zone" id="zone-B" style="top: 25%; left: 30%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="firestep">B</div>
+                            
+                            <!-- C: Duckboards -->
+                            <div class="drop-zone" id="zone-C" style="top: 50%; left: 20%;" ondrop="drop(event)" ondragover="allowDrop(event)" data-correct="duckboards">C</div>
+                        </div>
+                    </div>
+                    
+                    <div class="game-card p-8">
+                         <div class="absolute -top-3 -left-1 bg-[#2b261e] text-[#dcd5c7] px-3 py-1 text-[10px] font-bold uppercase tracking-widest border border-[#5c5542]">SitRep</div>
+                        <h2 id="round-title" class="text-2xl typewriter font-bold mb-4 text-[#1a1a1a] border-b-2 border-[#5c5542] pb-2 border-dotted">Loading...</h2>
+                        <p id="round-text" class="text-lg leading-relaxed mb-8 text-[#1a1a1a] font-bold font-mono"></p>
+                        
+                        <!-- Standard Options -->
+                        <div id="options-container" class="flex flex-col gap-3"></div>
+                        
+                        <!-- Drag Items Container (Hidden by default) -->
+                        <div id="diagram-items" class="hidden grid grid-cols-2 md:grid-cols-3 gap-2">
+                            <div id="drag1" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="nomansland">Deadly ground between trenches</div>
+                            <div id="drag2" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="barbedwire">Defensive wire obstacles</div>
+                            <div id="drag3" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="firestep">Raised platform for shooting</div>
+                            <div id="drag4" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="duckboards">Wooden slats to keep feet dry</div>
+                            <div id="drag5" class="draggable-item" draggable="true" ondragstart="drag(event)" data-val="parapet">Protective earthen wall</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Action Log -->
+                <div class="lg:col-span-4 flex flex-col gap-6">
+                    <div class="game-card p-6 flex flex-col h-full min-h-[400px]">
+                        <h3 class="text-[#8a1c1c] uppercase text-xs font-black mb-6 flex items-center gap-2 tracking-[0.2em] border-b border-[#8a1c1c] pb-2">
+                            <i class="fa-solid fa-terminal"></i> Log
+                        </h3>
+                        <div id="fate-content" class="text-sm font-mono font-bold text-stone-800 leading-relaxed space-y-3 flex-grow overflow-y-auto max-h-[400px]">
+                            <div class="opacity-50">> Awaiting Input...</div>
+                        </div>
+                        
+                        <!-- Luck/Dice Mechanic -->
+                        <div id="dice-roll-ui" class="hidden mt-4 pt-4 border-t-2 border-dashed border-[#5c5542]">
+                            <p class="text-[9px] uppercase text-[#1a1a1a] mb-4 text-center tracking-widest font-bold bg-[#bdaea1] py-1">Chance Encounter</p>
+                            <div class="flex items-center justify-center mb-4">
+                                <div id="dice-value" class="w-20 h-20 bg-[#f0ebe0] border-4 border-[#2b261e] rounded flex items-center justify-center text-4xl typewriter text-[#2b261e] shadow-inner transition-all">?</div>
+                            </div>
+                            <button id="roll-btn" class="w-full btn-tactile py-3 border-[#8a1c1c] text-[#dcd5c7] animate-pulse">
+                                <span class="text-red-300">ROLL D12</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS -->
+        <div id="map-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-6">
+            <div class="map-container w-full max-w-4xl p-6 bg-[#d2b48c]">
+                <div class="flex justify-between items-center mb-4 border-b-2 border-[#2b261e] pb-2">
+                    <h2 class="text-2xl stencil text-[#2b261e]">Tactical Map</h2>
+                    <div class="flex gap-4 items-center">
+                        <label for="map-upload" class="cursor-pointer btn-tactile py-1 px-3 text-[10px]">
+                             <i class="fa-solid fa-upload"></i> Custom Map
+                        </label>
+                        <input type="file" id="map-upload" class="hidden" accept="image/*" onchange="handleMapUpload(event)">
+                        <button onclick="toggleMap()" class="text-[#2b261e] text-3xl hover:text-[#8a1c1c] transition">&times;</button>
+                    </div>
+                </div>
+                <div class="relative w-full aspect-video bg-[#c2b280] border-2 border-[#2b261e] overflow-hidden shadow-inner flex items-center justify-center" id="map-view-area">
+                    <img id="default-map-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Western_Front_1918_Avg.jpg/1200px-Western_Front_1918_Avg.jpg" alt="Western Front Map" class="w-full h-full object-cover absolute inset-0 mix-blend-multiply opacity-80 filter sepia-[.3] contrast-125">
+                    <img id="custom-map-img" class="absolute inset-0 w-full h-full object-cover hidden mix-blend-multiply opacity-80">
+                    <div class="hotspot" style="top: 35%; left: 35%;" onclick="showInfo('The Somme', 'Devastated by years of conflict.')"></div>
+                    <div class="hotspot" style="top: 55%; left: 45%;" onclick="showInfo('Belleau Wood', 'U.S. Marines pushing through heavy timber.')"></div>
+                    <div class="hotspot" style="top: 65%; left: 60%;" onclick="showInfo('Meuse-Argonne', 'The final bloody offensive.')"></div>
+                </div>
+                <div id="map-info" class="mt-4 p-3 bg-[#2b261e] text-[#dcd5c7] text-sm text-center font-mono border border-[#5c5542]">
+                    > SELECT SECTOR FOR INTEL
+                </div>
+            </div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="hidden text-center max-w-3xl py-12 px-4 mx-auto w-full z-50">
+            <div class="game-card p-10 transform -rotate-1">
+                <h1 id="end-title" class="text-6xl stencil mb-6 text-[#2b261e] uppercase">M.I.A.</h1>
+                <p id="end-description" class="text-xl mb-10 leading-relaxed text-stone-800 font-bold font-mono"></p>
+                <div id="stats-summary" class="bg-[#bdaea1] p-6 mb-10 border border-stone-600 shadow-inner"></div>
+                <button onclick="location.reload()" class="w-full btn-tactile py-5 text-xl">
+                    <i class="fa-solid fa-rotate-left"></i> Re-Enlist
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="fixed bottom-2 right-2 text-[10px] text-stone-600 opacity-50 pointer-events-none z-[9999] font-mono">Frontline Edition v2.1</div>
+
+    <script>
+        let gameState = { round: 0, health: 10, maxHealth: 10, role: '', correctDrops: 0 };
+
+        function triggerFX(type) {
+            const overlay = document.getElementById('fx-overlay');
+            const body = document.body;
+            if (type === 'damage') {
+                body.classList.remove('shake-effect'); void body.offsetWidth; body.classList.add('shake-effect');
+                overlay.style.backgroundColor = 'red'; overlay.style.opacity = '0.4';
+                setTimeout(() => { overlay.style.opacity = '0'; }, 100);
+            } else if (type === 'heal') {
+                overlay.style.backgroundColor = 'green'; overlay.style.opacity = '0.3';
+                setTimeout(() => { overlay.style.opacity = '0'; }, 150);
+            }
+        }
+
+        const ROUNDS = [
+            {
+                title: "Sector 1: The Railhead",
+                text: "You arrive at the railhead near Verdun. The sky is a bruised purple and the air tastes of cordite. Your Sergeant is barking orders to unload heavy crates of artillery shells.",
+                image: "Round1.png",
+                options: [
+                    { 
+                        text: "Help unload shells (Labor)", 
+                        health: -1, 
+                        outcome: "Your muscles scream, but the supply officer gives you extra chocolate.", 
+                        fate: "Physical toll (-1 HP), Morale up.",
+                        sound: "Explosion1.mp3" // Added Sound Here
+                    },
+                    { text: "Orient yourself with the maps", health: 0, outcome: "You memorize the fallback lines and bunker locations.", fate: "No physical change, but focus is high." },
+                    { text: "Try to steal a nap in the mud", health: +1, outcome: "You catch 20 minutes of rest despite the shelling.", fate: "Recuperated (+1 HP)." }
+                ]
+            },
+            // --- NEW DIAGRAM ROUND ---
+            {
+                type: "diagram",
+                title: "Training: Trench Anatomy",
+                text: "Before taking the night watch, prove you know the layout. Drag the tactical descriptions to the correct Labels (A, B, C, D, E) on the diagram.",
+                image: "Diagram1.png"
+            },
+            {
+                title: "Sector 2: Night Watch",
+                text: "Your first night in the frontline trench. A flare goes up, bathing No Man's Land in a haunting white light. You hear a wire-cutter clicking just 20 yards away.",
+                image: "Round2.png",
+                options: [
+                    { text: "Fire your Springfield at the sound", health: 0, outcome: "You hit a stray dog. Your nerves are shot, and now the enemy knows your spot.", fate: "Exposed and rattled." },
+                    { text: "Toss a grenade into the dark", health: -1, outcome: "A German raiding party was indeed there. They retreat, but a piece of debris hits your shoulder.", fate: "Wounded (-1 HP)." },
+                    { text: "Alert your officer quietly", health: 0, outcome: "The machine gunners prep. The raiders see the movement and vanish.", fate: "Professional conduct." }
+                ],
+                challenge: { type: "dice", difficulty: 6, success: "Patrol unnoticed. (+1 HP)", fail: "Panic fire return! (-1 HP)" }
+            },
+            {
+                title: "Sector 3: The Hunger",
+                text: "The supply lines are bogged down in the mud. You've been eating hardtack and muddy water for three days. You are starving.",
+                image: "Round3.png",
+                options: [
+                    { text: "Scavenge from a fallen soldier", health: 0, outcome: "You find a tin of bully beef. It's grim, but you eat.", fate: "Survival instinct." },
+                    { text: "Drink from the shell crater", health: -3, outcome: "The water was contaminated with gas residue. You are violently ill.", fate: "Severe illness (-3 HP)." },
+                    { text: "Share your last bit of bread", health: +1, outcome: "A comrade gives you a pair of dry socks in return.", fate: "Altruism (+1 HP)." }
+                ],
+                challenge: { type: "dice", difficulty: 10, success: "Found hidden rations! (+2 HP)", fail: "Starvation deepens (-1 HP)" }
+            },
+            {
+                title: "Sector 4: Yellow Fog",
+                text: "A low, greenish cloud begins to drift into the trench. The warning bell rings—a sharp, frantic metal-on-metal clang. 'GAS! GAS!'",
+                image: "Round4.png",
+                options: [
+                    { text: "Don your mask immediately", health: 0, outcome: "The seal is tight. You sit in silence for an hour, breathing rubbery air.", fate: "Safety first." },
+                    { text: "Help the rookie next to you", health: -2, outcome: "He survives, but you take a lungful of chlorine before your mask is on.", fate: "Heroic sacrifice (-2 HP)." },
+                    { text: "Try to outrun the cloud", health: -5, outcome: "You can't outrun the wind. The gas sears your throat.", fate: "Fatal error (-5 HP)." }
+                ],
+                challenge: { type: "dice", difficulty: 7, success: "Mask sealed in seconds! (+0 HP)", fail: "Fumbled the straps! (-2 HP)" }
+            },
+            {
+                title: "Sector 5: Over the Top",
+                text: "The whistle blows. A shrill, piercing sound that haunts your dreams. You climb the ladder and sprint into the chaos of lead and mud.",
+                image: "Round5.png",
+                options: [
+                    { text: "Charge the MG nest", health: -4, outcome: "You knock it out with a grenade, but catch two bullets in the thigh.", fate: "Major wound (-4 HP)." },
+                    { text: "Dive into a shell crater", health: -1, outcome: "You survive the initial volley, pinned down by fire.", fate: "Pinned (-1 HP)." },
+                    { text: "Provide covering fire", health: -2, outcome: "You stay upright to shoot, making yourself a target.", fate: "Suppression role (-2 HP)." }
+                ],
+                challenge: { type: "dice", difficulty: 8, success: "Dodged heavy fire! (+0 HP)", fail: "Shrapnel graze! (-2 HP)" }
+            },
+            {
+                title: "Sector 6: Trench Foot",
+                text: "It has rained for 72 hours. Your boots are full of water. Your feet have turned a ghostly white and have lost all feeling.",
+                image: "Round6.png",
+                options: [
+                    { text: "Rub whale oil on your feet", health: +1, outcome: "It's greasy and smells, but it saves your toes.", fate: "Hygiene (+1 HP)." },
+                    { text: "Ignore it and keep your boots on", health: -2, outcome: "The rot sets in. You can barely walk.", fate: "Medical neglect (-2 HP)." },
+                    { text: "Swap socks with a dead man", health: 0, outcome: "A dark necessity. Your feet are dry for now.", fate: "Desperation." }
+                ]
+            },
+            {
+                title: "Sector 7: The Sniper",
+                text: "A German sniper in a ruined farmhouse is picking off the runners. Your platoon leader asks for a volunteer to crawl out and locate him.",
+                image: "Round7.png",
+                options: [
                     { text: "Volunteer (Scout)", health: -1, outcome: "You find him, but a bullet grazes your helmet.", fate: "Risk taken (-1 HP)." },
                     { text: "Stay back and use a periscope", health: 0, outcome: "You spot the flash safely. The artillery takes care of the rest.", fate: "Calculated play." },
                     { text: "Try to bait the sniper", health: -2, outcome: "You raise your hat on a stick. He doesn't fall for it; he shoots through the trench wall instead.", fate: "Outsmarted (-2 HP)." }

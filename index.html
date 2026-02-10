@@ -69,6 +69,37 @@
             border: 1px solid #c9bda4;
         }
 
+        .scan-line {
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        .vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid #3d3522;
+            border-top: 4px solid #e4e4e7;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #18181b; }
@@ -86,7 +117,8 @@
         <div id="splash" class="text-center max-w-2xl py-12 mx-auto">
             <h1 class="text-6xl md:text-8xl typewriter text-yellow-700 mb-2 uppercase tracking-tighter filter drop-shadow-lg">Over There</h1>
             <p class="text-xl mb-10 italic text-zinc-500 uppercase tracking-widest">A Western Front Simulation</p>
-            <div class="bg-zinc-900/80 p-10 rounded-xl border-2 border-yellow-900/30 mb-10 shadow-2xl backdrop-blur-sm">
+            <div class="bg-zinc-900/80 p-10 rounded-xl border-2 border-yellow-900/30 mb-10 shadow-2xl backdrop-blur-sm relative overflow-hidden">
+                <div class="scan-line"></div>
                 <p class="text-xl mb-6 leading-relaxed">France, 1918. You are a doughboy in the AEF. The air is iron, the ground is liquid, and the whistles are screaming.</p>
                 <p class="text-zinc-400">Can you survive 10 rounds on the line?</p>
             </div>
@@ -148,10 +180,31 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <!-- Left Narrative -->
                 <div class="lg:col-span-8 flex flex-col gap-6">
+                    <!-- Image Area with AI Generation -->
                     <div id="image-area" class="w-full aspect-[21/9] bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative shadow-2xl group">
-                        <img id="round-image" src="" alt="War" class="w-full h-full object-cover opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000">
-                        <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent"></div>
-                        <div id="round-title" class="absolute bottom-8 left-8 text-4xl typewriter text-white font-bold tracking-tight uppercase">Loading...</div>
+                        <div class="vignette"></div>
+                        <div class="scan-line"></div>
+                        
+                        <!-- The Image -->
+                        <img id="round-image" src="" alt="War" class="w-full h-full object-cover opacity-60 grayscale sepia-[.5] transition-all duration-1000">
+                        
+                        <!-- AI Controls -->
+                        <div id="ai-controls" class="absolute inset-0 flex items-center justify-center z-20 bg-black/40 backdrop-blur-[2px] opacity-100 transition-opacity duration-300">
+                             <div class="text-center">
+                                <button onclick="requestRecon()" id="recon-btn" class="bg-zinc-800/90 hover:bg-yellow-900/90 text-white border border-yellow-700/50 px-6 py-3 rounded-sm uppercase tracking-widest text-xs font-bold shadow-[0_0_15px_rgba(0,0,0,0.8)] backdrop-blur-md flex items-center gap-2 mx-auto">
+                                    <i class="fa-solid fa-camera-retro"></i> Request Recon (AI)
+                                </button>
+                                <p class="text-[10px] text-zinc-400 mt-2 tracking-widest uppercase">Generate Historical Imagery</p>
+                             </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="ai-loading" class="absolute inset-0 flex flex-col items-center justify-center z-30 bg-black/80 hidden">
+                            <div class="loader mb-4"></div>
+                            <p class="text-xs text-yellow-700 typewriter">Developing plate...</p>
+                        </div>
+
+                        <div id="round-title" class="absolute bottom-8 left-8 text-4xl typewriter text-white font-bold tracking-tight uppercase drop-shadow-lg z-10">Loading...</div>
                     </div>
                     
                     <div class="bg-zinc-900/50 p-10 rounded-xl border border-zinc-800/50 shadow-inner">
@@ -222,6 +275,8 @@
     </div>
 
     <script>
+        const apiKey = ""; // API Key injected by environment
+
         let gameState = {
             round: 0,
             health: 10,
@@ -235,6 +290,7 @@
                 title: "Sector 1: The Railhead",
                 text: "You arrive at the railhead near Verdun. The sky is a bruised purple and the air tastes of cordite. Your Sergeant is barking orders to unload heavy crates of artillery shells.",
                 image: "https://images.unsplash.com/photo-1590402449133-79ed6523e055?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "WWI railhead supply depot, 1918 France, soldiers unloading artillery crates from steam train, muddy tracks, misty morning, sepia tone, historically accurate photography, highly detailed, gritty",
                 options: [
                     { text: "Help unload shells (Labor)", health: -1, outcome: "Your muscles scream, but the supply officer gives you extra chocolate.", fate: "Physical toll (-1 HP), Morale up." },
                     { text: "Orient yourself with the maps", health: 0, outcome: "You memorize the fallback lines and bunker locations.", fate: "No physical change, but focus is high." },
@@ -245,6 +301,7 @@
                 title: "Sector 2: Night Watch",
                 text: "Your first night in the frontline trench. A flare goes up, bathing No Man's Land in a haunting white light. You hear a wire-cutter clicking just 20 yards away.",
                 image: "https://images.unsplash.com/photo-1547115865-c806e395213d?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "WWI trench night scene, bright magnesium flare illuminating No Man's Land, barbed wire silhouettes, deep shadows, cinematic lighting, gritty war photography, monochrome grain, atmospheric",
                 options: [
                     { text: "Fire your Springfield at the sound", health: 0, outcome: "You hit a stray dog. Your nerves are shot, and now the enemy knows your spot.", fate: "Exposed and rattled." },
                     { text: "Toss a grenade into the dark", health: -1, outcome: "A German raiding party was indeed there. They retreat, but a piece of debris hits your shoulder.", fate: "Wounded (-1 HP)." },
@@ -255,6 +312,7 @@
                 title: "Sector 3: The Hunger",
                 text: "The supply lines are bogged down in the mud. You've been eating hardtack and muddy water for three days. You are starving.",
                 image: "https://images.unsplash.com/photo-1563294132-84950882e38c?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "Interior of WWI dugout trench, tired soldiers eating from tin cans, candle light, claustrophobic earthen walls, dirty faces, historical detail, 1918, sepia photography",
                 options: [
                     { text: "Scavenge from a fallen soldier", health: 0, outcome: "You find a tin of bully beef. It's grim, but you eat.", fate: "Survival instinct." },
                     { text: "Drink from the shell crater", health: -3, outcome: "The water was contaminated with gas residue. You are violently ill.", fate: "Severe illness (-3 HP)." },
@@ -266,6 +324,7 @@
                 title: "Sector 4: Yellow Fog",
                 text: "A low, greenish cloud begins to drift into the trench. The warning bell rings—a sharp, frantic metal-on-metal clang. 'GAS! GAS!'",
                 image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "WWI gas attack, greenish chlorine fog rolling over trench, soldiers scrambling to put on gas masks, panic, eerie green tint, vintage war photography, nightmare atmosphere",
                 options: [
                     { text: "Don your mask immediately", health: 0, outcome: "The seal is tight. You sit in silence for an hour, breathing rubbery air.", fate: "Safety first." },
                     { text: "Help the rookie next to you", health: -2, outcome: "He survives, but you take a lungful of chlorine before your mask is on.", fate: "Heroic sacrifice (-2 HP)." },
@@ -276,6 +335,7 @@
                 title: "Sector 5: Over the Top",
                 text: "The whistle blows. A shrill, piercing sound that haunts your dreams. You climb the ladder and sprint into the chaos of lead and mud.",
                 image: "https://images.unsplash.com/photo-1533228834458-95853b925577?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "WWI soldiers climbing out of trenches, going over the top, action shot, explosions in background, mud flying, motion blur, gritty combat photography, black and white",
                 options: [
                     { text: "Charge the MG nest", health: -4, outcome: "You knock it out with a grenade, but catch two bullets in the thigh.", fate: "Major wound (-4 HP)." },
                     { text: "Dive into a shell crater", health: -1, outcome: "You survive the initial volley, pinned down by fire.", fate: "Pinned (-1 HP)." },
@@ -286,6 +346,7 @@
                 title: "Sector 6: Trench Foot",
                 text: "It has rained for 72 hours. Your boots are full of water. Your feet have turned a ghostly white and have lost all feeling.",
                 image: "https://images.unsplash.com/photo-1505672678657-cc7037095e60?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "Flooded WWI trench floor, heavy rain, soldiers sitting on ammunition crates trying to keep feet dry, water reflections, mud, miserable atmosphere, sepia",
                 options: [
                     { text: "Rub whale oil on your feet", health: +1, outcome: "It's greasy and smells, but it saves your toes.", fate: "Hygiene (+1 HP)." },
                     { text: "Ignore it and keep your boots on", health: -2, outcome: "The rot sets in. You can barely walk.", fate: "Medical neglect (-2 HP)." },
@@ -296,6 +357,7 @@
                 title: "Sector 7: The Sniper",
                 text: "A German sniper in a ruined farmhouse is picking off the runners. Your platoon leader asks for a volunteer to crawl out and locate him.",
                 image: "https://images.unsplash.com/photo-1501705388883-4ed8a543392c?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "View through trench periscope, ruined French farmhouse in distance, destroyed landscape, cratered earth, WWI no man's land, telephoto effect, grainy photography",
                 options: [
                     { text: "Volunteer (Scout)", health: -1, outcome: "You find him, but a bullet grazes your helmet.", fate: "Risk taken (-1 HP)." },
                     { text: "Stay back and use a periscope", health: 0, outcome: "You spot the flash safely. The artillery takes care of the rest.", fate: "Calculated play." },
@@ -306,6 +368,7 @@
                 title: "Sector 8: The Fever",
                 text: "The Spanish Influenza is tearing through the camps. You wake up with a 104-degree fever and a cough that brings up blood.",
                 image: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "WWI field hospital tent interior, rows of cots with sick soldiers, nurses in 1918 uniform, dim lantern lighting, spanish flu ward, somber atmosphere, sepia tone",
                 options: [
                     { text: "Report to the Casualty Clearing Station", health: -2, outcome: "Crowded and miserable, but you get some rest.", fate: "Hospitalized (-2 HP)." },
                     { text: "Stay on the line", health: -4, outcome: "You collapse in the mud. The pneumonia is brutal.", fate: "Critically ill (-4 HP)." },
@@ -316,6 +379,7 @@
                 title: "Sector 9: The Final Advance",
                 text: "The Hindenburg Line is broken! We are chasing the enemy through a burning forest. It's hand-to-hand combat in the thicket.",
                 image: "https://images.unsplash.com/photo-1526333313259-ff8736465451?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "WWI soldiers running through burning forest, bayonets fixed, smoke, fallen trees, intense combat, debris, high contrast, gritty historical war photography",
                 options: [
                     { text: "Lead the bayonet charge", health: -3, outcome: "You take the trench, but you're cut up in the melee.", fate: "Glory at a cost (-3 HP)." },
                     { text: "Clear out a concrete bunker", health: -1, outcome: "A grenade blast rings your ears permanently.", fate: "Tinnitus (-1 HP)." },
@@ -326,6 +390,7 @@
                 title: "Sector 10: 10:59 AM",
                 text: "The word has come down. The Armistice is signed. At 11:00 AM, the war ends. One minute left. An enemy MG is still firing blindly.",
                 image: "https://images.unsplash.com/photo-1533228100845-08145b01de2c?auto=format&fit=crop&q=80&w=1200",
+                aiPrompt: "WWI Armistice day battlefield, sun breaking through clouds over trench, silence, birds on barbed wire, peaceful but scarred landscape, solitary soldier silhouette, hopeful, sepia",
                 options: [
                     { text: "Stay low in the dugout", health: 0, outcome: "Silence falls. The birds begin to sing for the first time in years.", fate: "Survivor." },
                     { text: "Fire one last shot for luck", health: -1, outcome: "The muzzle flash draws fire. You're hit in the arm at 11:00 exactly.", fate: "Tragedy (-1 HP)." },
@@ -333,6 +398,69 @@
                 ]
             }
         ];
+
+        // --- AI IMAGE GENERATION LOGIC ---
+        async function requestRecon() {
+            const currentRound = ROUNDS[gameState.round];
+            const btn = document.getElementById('recon-btn');
+            const loading = document.getElementById('ai-loading');
+            const controls = document.getElementById('ai-controls');
+            const img = document.getElementById('round-image');
+            
+            // UI State
+            controls.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            try {
+                // Construct payload
+                const fullPrompt = `historically accurate World War 1 photography, 1918, ${currentRound.aiPrompt}`;
+                
+                // Exponential backoff strategy
+                const maxRetries = 3;
+                let attempt = 0;
+                let result = null;
+
+                while (attempt < maxRetries && !result) {
+                    try {
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                instances: [{ prompt: fullPrompt }],
+                                parameters: { sampleCount: 1 }
+                            })
+                        });
+
+                        if (!response.ok) throw new Error(response.statusText);
+                        result = await response.json();
+                    } catch (e) {
+                        attempt++;
+                        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+                    }
+                }
+
+                if (result && result.predictions && result.predictions[0]) {
+                    const base64 = result.predictions[0].bytesBase64Encoded;
+                    img.src = `data:image/png;base64,${base64}`;
+                    // Remove grayscale for AI images to show off the color/sepia
+                    img.classList.remove('grayscale');
+                } else {
+                    throw new Error("No image generated");
+                }
+
+            } catch (err) {
+                console.error("Recon failed:", err);
+                // Reset UI on failure
+                controls.classList.remove('hidden');
+                // Show simple error feedback
+                btn.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Comms Failed`;
+                setTimeout(() => {
+                    btn.innerHTML = `<i class="fa-solid fa-camera-retro"></i> Request Recon (AI)`;
+                }, 3000);
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
 
         function startGame() {
             document.getElementById('splash').classList.add('hidden');
@@ -354,11 +482,22 @@
             const titleElem = document.getElementById('round-title');
             const textElem = document.getElementById('round-text');
             const imageElem = document.getElementById('round-image');
+            const controls = document.getElementById('ai-controls');
+            const btn = document.getElementById('recon-btn');
 
             if(roundNumElem) roundNumElem.innerText = (gameState.round + 1).toString().padStart(2, '0');
             if(titleElem) titleElem.innerText = round.title;
             if(textElem) textElem.innerText = round.text;
-            if(imageElem) imageElem.src = round.image;
+            
+            // Reset Image State
+            if(imageElem) {
+                imageElem.src = round.image;
+                imageElem.classList.add('grayscale'); // Reset to default style
+            }
+            // Reset AI Button
+            if(controls) controls.classList.remove('hidden');
+            if(btn) btn.innerHTML = `<i class="fa-solid fa-camera-retro"></i> Request Recon (AI)`;
+
 
             const container = document.getElementById('options-container');
             if(container) {

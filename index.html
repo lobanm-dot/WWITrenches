@@ -213,6 +213,11 @@
                         <button onclick="startGame()" class="w-full btn-tactile py-4 px-6 text-xl shadow-xl group relative overflow-hidden">
                             <i class="fa-solid fa-play mr-2 text-yellow-600"></i> Deploy Now
                         </button>
+                        
+                        <!-- Reset Button to clear memory -->
+                        <button onclick="resetData()" class="mt-6 text-[10px] font-bold text-stone-500 uppercase tracking-widest hover:text-[#8a1c1c] transition-colors flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-arrows-rotate"></i> Reset Comms / Clear Data
+                        </button>
                     </div>
                 </div>
             </div>
@@ -313,8 +318,8 @@
                              </div>
                         </div>
 
-                        <!-- Loading State -->
-                        <div id="ai-loading" class="absolute inset-0 flex flex-col items-center justify-center z-30 bg-[#1a1814]">
+                        <!-- Loading State (ADDED HIDDEN CLASS HERE) -->
+                        <div id="ai-loading" class="absolute inset-0 flex flex-col items-center justify-center z-30 bg-[#1a1814] hidden">
                             <div class="loader mb-4"></div>
                             <p class="text-xs text-[#b5a642] typewriter animate-pulse">Establishing Uplink...</p>
                         </div>
@@ -711,6 +716,10 @@
                 imageElem.classList.add('photo-gritty'); 
             }
             if(controls) controls.classList.remove('hidden');
+            
+            // Safety measure to ensure loading screen is hidden when starting new round
+            const loader = document.getElementById('ai-loading');
+            if(loader) loader.classList.add('hidden');
 
             const container = document.getElementById('options-container');
             if(container) {
@@ -930,6 +939,14 @@
         function showInfo(t, i) { 
             const info = document.getElementById('map-info');
             if(info) info.innerHTML = `<strong>${t}:</strong> ${i}`; 
+        }
+
+        // NEW: Function to handle the reset
+        function resetData() {
+            if(confirm("CONFIRMATION REQUIRED:\n\nThis will wipe your secure API Key and reset all field data.\n\nProceed?")) {
+                localStorage.removeItem('over_there_api_key');
+                location.reload();
+            }
         }
 
         window.onload = function() {
